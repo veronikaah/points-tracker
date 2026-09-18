@@ -1,92 +1,112 @@
 # WELCOME
 
-print("Welcome!")
 
-mode_input = input("Is the goal to have minimum or maximum points? (Enter min/max) ")
-if mode_input == "min":
-    mode = True
-else:
-    mode = False
+class Points_tracker:
 
+    MAX_POINTS = True
+    MIN_POINTS = False
 
+    def __init__(self):
+        self.players: dict[str, int] = {}
+        # Initial mode is max
+        self.mode: bool = self.MAX_POINTS
 
-print("Secondly, you will enter names of the players. Once you are finished, enter \"submit\" instead.")
-print("Each round, you will be asked to add number of points to each player.")
-print("If you want to finish the game, enter \"finish\" and you will be shown the results.")
+        self.round = 1
 
-player_count = 0
-player_names = []
-player_points = []
+    def set_mode(self):
+        mode_input = input("Is the goal to have minimum or maximum points? (Enter min/max) ").lower()
 
-while True:
-    name = input("Name of " + str(player_count + 1) + ". player? ")
+        while mode_input != "min" and mode_input != "max":
+            mode_input = input("Invalid input. Try again. (Enter min/max) ")
+            mode_input = mode_input.lower()
 
-    if name == "submit":
-        break
+        if mode_input == "min":
+            self.mode = self.MIN_POINTS
+        else:
+            self.mode = self.MAX_POINTS
 
-    player_names.append(name)
-    player_points.append(0)
-    player_count += 1
+    def set_players(self):
+        print("Enter names of the players. When finished, enter \"submit\".")
+        while True:
+            name = input(f"Name of player {len(self.players) + 1}: ").strip()
 
-print()
-print("Ready to play?")
-print()
+            if name.lower() == "submit":
+                if not self.players:
+                    print("You need to enter at least one player!")
+                    continue
+                break
 
-round_count = 1
+            if name in self.players:
+                print("Player with this name already exists.")
+                continue
 
+            if name:
+                self.players[name] = 0
 
-def round(count, points, names) -> bool:
-    print()
-    print("Round ", count, ":")
-    
-    for player in range(len(names)):
-        inpt = input("Points for " + str(names[player]) +  ": ")
+    def play_round(self) -> bool:
+        print("\nRound ", self.round, ":")
 
-        if inpt == "finish":
-            return False
+        for player in self.players:
+            inpt_points = input("Points for " + player +  ": ")
+            self.players[player] += int(inpt_points)
         
-        points[player] += int(inpt)
+        print("\nResults after ", self.round, ". round:\n")
 
-    print()
-    print("Results after ", count, ". round:")
-    print()
+        for player, points in self.players.items():
+            print(player, ": ", points)
 
-    for player in range(len(names)):
-        print(names[player], ": ", points[player])
+        self.round += 1
+        
+        next_round = input("Do you want to continue? (Y/N)").upper()
+        while next_round != "Y" and next_round != "N":
+            next_round = input("Invalid input. Please enter Y/N.").upper()
+        return next_round == "Y"
 
-    return True
+    def show_results(self):
+        print("\nFinal results after", self.round - 1, "rounds:")
 
+        winner_points = 0
+        place = 0
+        
+        # TODO special case for players with same number of points - currently sorted in order of iteration 
+        last_points: int | None = None
 
+        while self.players:
+            if self.mode == self.MIN_POINTS:
+                winner_points = min(self.players.values())
+            else:
+                winner_points = max(self.players.values())
 
-while True:
-    r = round(round_count, player_points, player_names)
-    if not r:
-        break
-    round_count += 1
+            if not last_points or last_points != winner_points:
+                place += 1
+                
+        
+            for player, points in self.players.items():
+                if points == winner_points:
+                    print(place, ". ", player, " with ", winner_points, " points.")
+                    last_points = winner_points
+
+                    self.players.pop(player)
+                    break
+        print("Congrats!")
+        
     
+def main():
+    print("Welcome!")
+    
+    game = Points_tracker()
+    game.set_mode()
+    game.set_players()
+
+    print("Each round, you will be asked to add points to each player.")
+    print("\nReady to play?")
+
+    while True:
+        if not game.play_round():
+            break
+
+    game.show_results()
     
 
-
-print()
-print("Final results:")
-
-
-results = {}
-for i in range(len(player_names)):
-    results[player_points[i]] = player_names[i]
-
-
-place = 1
-
-
-while results:
-    if mode:
-        m = min(results.keys())
-    else:
-        m = max(results.keys())
-    print(place, ". ", results[m], " with ", m, " points.")
-
-    results.pop(m)
-    place += 1
-
-print("Congrats!")
+if __name__ == "__main__":
+    main()
