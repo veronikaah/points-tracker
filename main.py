@@ -3,27 +3,27 @@
 
 class Points_tracker:
 
-    MAX_POINTS = True
-    MIN_POINTS = False
+    HIGHEST = True
+    LOWEST = False
+    #TODO zmena nazvu
 
     def __init__(self):
         self.players: dict[str, int] = {}
         # Initial mode is max
-        self.mode: bool = self.MAX_POINTS
+        self.mode: bool = self.HIGHEST
 
         self.round = 1
 
     def set_mode(self):
-        mode_input = input("Is the goal to have minimum or maximum points? (Enter min/max) ").lower()
+        mode_input = input("Is the goal to have lowest or highest score? (Enter H/L) ").lower()
 
-        while mode_input != "min" and mode_input != "max":
-            mode_input = input("Invalid input. Try again. (Enter min/max) ")
-            mode_input = mode_input.lower()
+        while mode_input != "h" and mode_input != "l":
+            mode_input = input("Invalid input. Try again. (Enter H/L) ").lower()
 
-        if mode_input == "min":
-            self.mode = self.MIN_POINTS
+        if mode_input == "l":
+            self.mode = self.LOWEST
         else:
-            self.mode = self.MAX_POINTS
+            self.mode = self.HIGHEST
 
     def set_players(self):
         print("Enter names of the players. When finished, enter \"submit\".")
@@ -47,13 +47,13 @@ class Points_tracker:
         print("\nRound ", self.round, ":")
 
         for player in self.players:
-            inpt_points = input("Points for " + player +  ": ")
-            self.players[player] += int(inpt_points)
+            new_score = input("Points for " + player +  ": ")
+            self.players[player] += int(new_score)
         
         print("\nResults after ", self.round, ". round:\n")
 
-        for player, points in self.players.items():
-            print(player, ": ", points)
+        for player, score in self.players.items():
+            print(player, ": ", score)
 
         self.round += 1
         
@@ -65,26 +65,26 @@ class Points_tracker:
     def show_results(self):
         print("\nFinal results after", self.round - 1, "rounds:")
 
-        winner_points = 0
+        winner_score = 0
         place = 0
         
         # TODO special case for players with same number of points - currently sorted in order of iteration 
-        last_points: int | None = None
+        last_score: int | None = None
 
         while self.players:
-            if self.mode == self.MIN_POINTS:
-                winner_points = min(self.players.values())
+            if self.mode == self.LOWEST:
+                winner_score = min(self.players.values())
             else:
-                winner_points = max(self.players.values())
+                winner_score = max(self.players.values())
 
-            if not last_points or last_points != winner_points:
+            if not last_score or last_score != winner_score:
                 place += 1
                 
         
-            for player, points in self.players.items():
-                if points == winner_points:
-                    print(place, ". ", player, " with ", winner_points, " points.")
-                    last_points = winner_points
+            for player, score in self.players.items():
+                if score == winner_score:
+                    print(place, ". ", player, " with ", winner_score, " points.")
+                    last_score = winner_score
 
                     self.players.pop(player)
                     break
